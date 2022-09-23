@@ -19,19 +19,19 @@ def save_image(file_path, images_url, settings=None):
         file.write(response.content)
 
 
-def get_params(url):
+def get_params_xkcd_comic(url):
     response = requests.get(f'{url}info.0.json')
     response.raise_for_status()
     params_pic = response.json()
     return params_pic['alt'], params_pic['img'], params_pic['num']
 
 
-def get_address_for_upload_img(token):
+def get_address_for_upload_img(token, group_id):
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
     params = {
         'access_token': token,
         'v': 5.131,
-        'group_id': 216091025,
+        'group_id': group_id,
     }
     response = requests.get(url, params)
     response.raise_for_status()
@@ -87,14 +87,16 @@ if __name__ == '__main__':
     vk_token = os.getenv('VK_ACCESS_TOKEN')
     my_group_id = os.getenv('GROUP_ID')
     url_comics = get_random_xkcd()
-    text, img_url, img_id = get_params(url_comics)
-    Path(f'{img_path}').mkdir(parents=True, exist_ok=True)
-    path = Path.cwd() / f'{img_path}' / f'{img_id}.png'
-    save_image(path, img_url)
-    server_url = get_address_for_upload_img(vk_token)
-    server_id, img_hash, photos = upload_img_to_server(server_url, path)
-    owner_id, img_id = save_img_to_vk(
-        vk_token, server_id, img_hash, photos, my_group_id
-    )
-    wall_post_vk(vk_token, owner_id, img_id, text, my_group_id)
-    shutil.rmtree(img_path)
+    try:
+        text, img_url, img_id = get_params_xkcd_comic(url_comics)
+        Path(f'{img_path}').mkdir(parents=True, exist_ok=True)
+        path = Path.cwd() / f'{img_path}' / f'{img_id}.png'
+        save_image(path, img_url)
+        server_url = get_address_for_upload_img(vk_token, my_group_id)
+        server_id, img_hash, photos = upload_img_to_server(server_url, path)
+        owner_id, img_id = save_img_to_vk(
+            vk_token, server_id, img_hash, photos, my_group_id
+        )
+        wall_post_vk(vk_token, owner_id, img_id, text, my_group_id)
+    finally:
+        shutil.rmtree(img_path)
