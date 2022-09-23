@@ -26,30 +26,6 @@ def get_params(url):
     return params_pic['alt'], params_pic['img'], params_pic['num']
 
 
-def get_access_token(key):
-    url = 'https://oauth.vk.com/authorize'
-    params = {
-        'client_id': key,
-        'response_type': 'token',
-        'scope': 'photos, groups, wall, offline'
-    }
-    response = requests.get(url, params=params)
-    response.raise_for_status()
-    return response.text
-
-
-def get_groups(token):
-    url = 'https://api.vk.com/method/groups.get'
-    params = {
-        'access_token': token,
-        'extended': 1,
-        'v': 5.131,
-    }
-    response = requests.get(url, params)
-    response.raise_for_status()
-    return response.json()
-
-
 def get_address_for_upload_img(token):
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
     params = {
@@ -68,6 +44,7 @@ def upload_img_to_server(url, path):
             'file1':  img_path
         }
         response = requests.post(url, files=files)
+    response.raise_for_status()
     load_options = response.json()
     return load_options['server'], load_options['hash'], load_options['photo']
 
