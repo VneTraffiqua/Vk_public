@@ -85,7 +85,6 @@ if __name__ == '__main__':
     load_dotenv()
     img_path = os.getenv('IMG_PATH')
     vk_token = os.getenv('VK_ACCESS_TOKEN')
-    secret_key = os.getenv('CLIENT_ID')
     my_group_id = os.getenv('GROUP_ID')
     url_comics = get_random_xkcd()
     text, img_url, img_id = get_params(url_comics)
