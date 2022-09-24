@@ -19,7 +19,7 @@ def save_image(file_path, images_url, settings=None):
         file.write(response.content)
 
 
-def get_params_xkcd_comic(url):
+def get_xkcd_comic_params(url):
     response = requests.get(f'{url}info.0.json')
     response.raise_for_status()
     params_pic = response.json()
@@ -66,7 +66,7 @@ def save_img_to_vk(token, server_id, img_hash, photos, group_id):
     return response_params['owner_id'], response_params['id']
 
 
-def wall_post_vk(token, owner_id, pic_id, message, group_id):
+def make_wall_post_vk(token, owner_id, pic_id, message, group_id):
     url = 'https://api.vk.com/method/wall.post'
     params = {
         'access_token': token,
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     my_group_id = os.getenv('GROUP_ID')
     url_comics = get_random_xkcd()
     try:
-        text, img_url, img_id = get_params_xkcd_comic(url_comics)
+        text, img_url, img_id = get_xkcd_comic_params(url_comics)
         Path(f'{img_path}').mkdir(parents=True, exist_ok=True)
         path = Path.cwd() / f'{img_path}' / f'{img_id}.png'
         save_image(path, img_url)
@@ -97,6 +97,6 @@ if __name__ == '__main__':
         owner_id, img_id = save_img_to_vk(
             vk_token, server_id, img_hash, photos, my_group_id
         )
-        wall_post_vk(vk_token, owner_id, img_id, text, my_group_id)
+        make_wall_post_vk(vk_token, owner_id, img_id, text, my_group_id)
     finally:
         shutil.rmtree(img_path)
